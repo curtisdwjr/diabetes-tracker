@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 Diabetes Tracker</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 50%, #e0e0e0 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .date {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            color: #555;
+            border-bottom-color: #666;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Input Form */
+        .input-form {
+            background: #f8f8f8;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Horizontal input row */
+        .input-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #444;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        
+        input[type="number"],
+        input[type="text"],
+        input[type="time"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #d0d0d0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+        
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        input[type="time"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #888;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .input-hint {
+            font-size: 0.85rem;
+            color: #777;
+            margin-top: 5px;
+        }
+        
+        /* Buttons */
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.05rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .btn-primary {
+            background: #666;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #555;
+        }
+        
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+            margin-top: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+        
+        /* Today's Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        /* Entries List */
+        .entries-container {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .entry-item {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #e8e8e8;
+        }
+        
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .entry-time {
+            font-weight: 600;
+            color: #444;
+            font-size: 0.95rem;
+        }
+        
+        .entry-delete {
+            background: #ffebee;
+            color: #c62828;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .entry-delete:hover {
+            background: #ffcdd2;
+        }
+        
+        .entry-values {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .entry-value {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .entry-value-label {
+            font-size: 0.8rem;
+            color: #777;
+            margin-bottom: 4px;
+        }
+        
+        .entry-value-number {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .entry-value-unit {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .entry-notes {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            color: #555;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .entry-notes-label {
+            font-size: 0.8rem;
+            color: #777;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+        
+        /* History */
+        .history-date-group {
+            margin-bottom: 30px;
+        }
+        
+        .history-date-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.6rem;
+            }
+            
+            .entry-values {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 Diabetes Tracker</h1>
+            <p class="date" id="currentDate"></p>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('today')">Today</button>
+            <button class="tab" onclick="switchTab('history')">History</button>
+        </div>
+        
+        <!-- Today Tab -->
+        <div id="todayTab" class="tab-content active">
+            <!-- Input Form -->
+            <div class="input-form">
+                <h3 style="color: #444; margin-bottom: 20px; font-size: 1.1rem;">New Reading</h3>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="timeInput">Time</label>
+                        <input type="time" id="timeInput">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="glucoseInput">Glucose</label>
+                        <input type="number" id="glucoseInput" placeholder="mg/dL" min="0" max="600">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="insulinInput">Insulin</label>
+                        <input type="number" id="insulinInput" placeholder="units" min="0" max="100" step="0.5">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notesInput">Notes (Optional)</label>
+                    <textarea id="notesInput" placeholder="Meal info, how you feel, etc..."></textarea>
+                </div>
+                
+                <button class="btn-primary" onclick="addEntry()">💾 Save Entry</button>
+                <button class="btn-secondary" onclick="clearForm()">Clear Form</button>
+            </div>
+            
+            <!-- Today's Entries Heading -->
+            <h3 style="color: #444; margin-bottom: 15px; font-size: 1.1rem;">Today's Entries</h3>
+            
+            <!-- Today's Stats -->
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="avgGlucose">--</div>
+                    <div class="stat-label">Avg Glucose</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalInsulin">0</div>
+                    <div class="stat-label">Total Insulin</div>
+                </div>
+            </div>
+            
+            <!-- Type 1 Diabetes Info -->
+            <div style="background: #f8f8f8; padding: 15px; border-radius: 10px; margin-bottom: 25px; border-left: 4px solid #666;">
+                <p style="color: #555; font-size: 0.9rem; line-height: 1.5; margin: 0;">
+                    <strong>Type 1 Diabetes:</strong> Your pancreas produces little or no insulin. You need daily insulin injections to regulate blood sugar levels and stay healthy. But life is good.
+                </p>
+            </div>
+            
+            <!-- Today's Entries List -->
+            <div class="entries-container" id="todayEntries"></div>
+        </div>
+        
+        <!-- History Tab -->
+        <div id="historyTab" class="tab-content">
+            <h2 style="color: #333; margin-bottom: 20px; font-size: 1.3rem;">📊 History</h2>
+            <div class="entries-container" id="historyEntries"></div>
+        </div>
+    </div>
+    
+    <script>
+        let entries = [];
+        
+        function initializeApp() {
+            loadData();
+            displayDate();
+            updateTodayView();
+            displayHistory();
+        }
+        
+        function displayDate() {
+            const today = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = today.toLocaleDateString('en-US', options);
+        }
+        
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.getElementById('todayTab').classList.remove('active');
+            document.getElementById('historyTab').classList.remove('active');
+            
+            if (tabName === 'today') {
+                document.getElementById('todayTab').classList.add('active');
+            } else {
+                document.getElementById('historyTab').classList.add('active');
+                displayHistory();
+            }
+        }
+        
+        function addEntry() {
+            const glucose = parseFloat(document.getElementById('glucoseInput').value);
+            const insulin = parseFloat(document.getElementById('insulinInput').value);
+            const notes = document.getElementById('notesInput').value.trim();
+            const customTime = document.getElementById('timeInput').value;
+            
+            if (!glucose || !insulin) {
+                alert('Please enter both glucose level and insulin units');
+                return;
+            }
+            
+            // Use custom time if provided, otherwise use current time
+            let timestamp;
+            if (customTime) {
+                const today = new Date();
+                const [hours, minutes] = customTime.split(':');
+                today.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                timestamp = today.toISOString();
+            } else {
+                timestamp = new Date().toISOString();
+            }
+            
+            const entry = {
+                id: Date.now(),
+                timestamp: timestamp,
+                glucose: glucose,
+                insulin: insulin,
+                notes: notes
+            };
+            
+            entries.unshift(entry);
+            saveData();
+            updateTodayView();
+            clearForm();
+        }
+        
+        function clearForm() {
+            document.getElementById('timeInput').value = '';
+            document.getElementById('glucoseInput').value = '';
+            document.getElementById('insulinInput').value = '';
+            document.getElementById('notesInput').value = '';
+        }
+        
+        function deleteEntry(id) {
+            if (confirm('Delete this entry?')) {
+                entries = entries.filter(entry => entry.id !== id);
+                saveData();
+                updateTodayView();
+                displayHistory();
+            }
+        }
+        
+        function updateTodayView() {
+            const today = new Date().toDateString();
+            const todayEntries = entries.filter(entry => 
+                new Date(entry.timestamp).toDateString() === today
+            );
+            
+            // Update stats
+            if (todayEntries.length > 0) {
+                const avgGlucose = todayEntries.reduce((sum, e) => sum + e.glucose, 0) / todayEntries.length;
+                document.getElementById('avgGlucose').textContent = Math.round(avgGlucose);
+                
+                const totalInsulin = todayEntries.reduce((sum, e) => sum + e.insulin, 0);
+                document.getElementById('totalInsulin').textContent = totalInsulin.toFixed(1);
+            } else {
+                document.getElementById('avgGlucose').textContent = '--';
+                document.getElementById('totalInsulin').textContent = '0';
+            }
+            
+            // Display entries
+            const container = document.getElementById('todayEntries');
+            
+            if (todayEntries.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            container.innerHTML = '';
+            todayEntries.forEach(entry => {
+                container.appendChild(createEntryElement(entry));
+            });
+        }
+        
+        function createEntryElement(entry) {
+            const time = new Date(entry.timestamp).toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+            
+            const div = document.createElement('div');
+            div.className = 'entry-item';
+            div.innerHTML = `
+                <div class="entry-header">
+                    <div class="entry-time">${time}</div>
+                    <button class="entry-delete" onclick="deleteEntry(${entry.id})">Delete</button>
+                </div>
+                <div class="entry-values">
+                    <div class="entry-value">
+                        <div class="entry-value-label">Glucose</div>
+                        <div>
+                            <span class="entry-value-number">${entry.glucose}</span>
+                            <span class="entry-value-unit">mg/dL</span>
+                        </div>
+                    </div>
+                    <div class="entry-value">
+                        <div class="entry-value-label">Insulin</div>
+                        <div>
+                            <span class="entry-value-number">${entry.insulin}</span>
+                            <span class="entry-value-unit">units</span>
+                        </div>
+                    </div>
+                </div>
+                ${entry.notes ? `
+                    <div class="entry-notes">
+                        <div class="entry-notes-label">Notes:</div>
+                        ${entry.notes}
+                    </div>
+                ` : ''}
+            `;
+            
+            return div;
+        }
+        
+        function displayHistory() {
+            const container = document.getElementById('historyEntries');
+            
+            if (entries.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            // Group entries by date
+            const grouped = {};
+            entries.forEach(entry => {
+                const date = new Date(entry.timestamp).toDateString();
+                if (!grouped[date]) {
+                    grouped[date] = [];
+                }
+                grouped[date].push(entry);
+            });
+            
+            container.innerHTML = '';
+            
+            Object.keys(grouped).forEach(dateStr => {
+                const date = new Date(dateStr);
+                const dateFormatted = date.toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+                
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'history-date-group';
+                
+                const header = document.createElement('div');
+                header.className = 'history-date-header';
+                header.textContent = dateFormatted;
+                groupDiv.appendChild(header);
+                
+                grouped[dateStr].forEach(entry => {
+                    groupDiv.appendChild(createEntryElement(entry));
+                });
+                
+                container.appendChild(groupDiv);
+            });
+        }
+        
+        function saveData() {
+            localStorage.setItem('diabetesEntries', JSON.stringify(entries));
+        }
+        
+        function loadData() {
+            const saved = localStorage.getItem('diabetesEntries');
+            if (saved) {
+                entries = JSON.parse(saved);
+            }
+        }
+        
+        window.onload = initializeApp;
+    </script>
+</body>
+</html>
