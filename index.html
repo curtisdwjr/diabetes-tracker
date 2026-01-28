@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📝 Diabetes Tracker</title>
+    <title>➕ Glucose Tracker ➖</title>
     
     <style>
         * {
@@ -110,6 +110,131 @@
         .input-row .form-group {
             flex: 1;
             margin-bottom: 0;
+        }
+        
+        /* Injection Site Tracker */
+        .injection-tracker {
+            background: #f8f8f8;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .injection-tracker h4 {
+            color: #444;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .injection-circle {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            border: 3px solid #d0d0d0;
+            border-radius: 50%;
+            background: white;
+        }
+        
+        /* Navel button in center */
+        .navel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e8d5c4 0%, #d4c0b0 100%);
+            border: 2px solid #b8a89a;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+        }
+        
+        .navel-center::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #c4b0a0;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .injection-site {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            border: 3px solid #999;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #666;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .injection-site:hover {
+            background: #d0d0d0;
+            transform: scale(1.1);
+        }
+        
+        .injection-site.selected {
+            background: #666;
+            border-color: #444;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Position the 6 sites around the circle */
+        .site-1 {
+            top: 5%;
+            right: 25%;
+            transform: translate(50%, -50%);
+        }
+        
+        .site-3 {
+            top: 50%;
+            right: -20px;
+            transform: translateY(-50%);
+        }
+        
+        .site-5 {
+            bottom: 5%;
+            right: 25%;
+            transform: translate(50%, 50%);
+        }
+        
+        .site-7 {
+            bottom: 5%;
+            left: 25%;
+            transform: translate(-50%, 50%);
+        }
+        
+        .site-9 {
+            top: 50%;
+            left: -20px;
+            transform: translateY(-50%);
+        }
+        
+        .site-11 {
+            top: 5%;
+            left: 25%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .injection-hint {
+            font-size: 0.85rem;
+            color: #777;
+            margin-top: 15px;
         }
         
         label {
@@ -357,7 +482,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📝 Diabetes Tracker</h1>
+            <h1>➕ Glucose Tracker ➖</h1>
             <p class="date" id="currentDate"></p>
         </div>
         
@@ -390,6 +515,21 @@
                     </div>
                 </div>
                 
+                <!-- Injection Site Tracker -->
+                <div class="injection-tracker">
+                    <h4>Injection Site (around navel)</h4>
+                    <div class="injection-circle">
+                        <div class="navel-center"></div>
+                        <div class="injection-site site-1" data-position="1" onclick="selectInjectionSite('1')">1</div>
+                        <div class="injection-site site-3" data-position="3" onclick="selectInjectionSite('3')">3</div>
+                        <div class="injection-site site-5" data-position="5" onclick="selectInjectionSite('5')">5</div>
+                        <div class="injection-site site-7" data-position="7" onclick="selectInjectionSite('7')">7</div>
+                        <div class="injection-site site-9" data-position="9" onclick="selectInjectionSite('9')">9</div>
+                        <div class="injection-site site-11" data-position="11" onclick="selectInjectionSite('11')">11</div>
+                    </div>
+                    <div class="injection-hint">Click the position where you injected</div>
+                </div>
+                
                 <div class="form-group">
                     <label for="notesInput">Notes (Optional)</label>
                     <textarea id="notesInput" placeholder="Meal info, how you feel, etc..."></textarea>
@@ -417,7 +557,7 @@
             <!-- Type 1 Diabetes Info -->
             <div style="background: #f8f8f8; padding: 15px; border-radius: 10px; margin-bottom: 25px; border-left: 4px solid #666;">
                 <p style="color: #555; font-size: 0.9rem; line-height: 1.5; margin: 0;">
-                    <strong>Type 1 Diabetes:</strong> Your pancreas produces little or no insulin. You need daily insulin injections to regulate blood sugar levels and stay healthy. But life is good.
+                    <strong>Type 1 Diabetes:</strong> Your pancreas produces little or no insulin. You need daily insulin injections to regulate blood sugar levels and stay healthy. But life is darn good.
                 </p>
             </div>
             
@@ -434,6 +574,18 @@
     
     <script>
         let entries = [];
+        let selectedInjectionSite = null;
+        
+        function selectInjectionSite(position) {
+            // Remove selection from all sites
+            document.querySelectorAll('.injection-site').forEach(site => {
+                site.classList.remove('selected');
+            });
+            
+            // Select clicked site
+            document.querySelector(`[data-position="${position}"]`).classList.add('selected');
+            selectedInjectionSite = position;
+        }
         
         function initializeApp() {
             loadData();
@@ -491,6 +643,7 @@
                 timestamp: timestamp,
                 glucose: glucose,
                 insulin: insulin,
+                injectionSite: selectedInjectionSite,
                 notes: notes
             };
             
@@ -505,6 +658,12 @@
             document.getElementById('glucoseInput').value = '';
             document.getElementById('insulinInput').value = '';
             document.getElementById('notesInput').value = '';
+            
+            // Clear injection site selection
+            document.querySelectorAll('.injection-site').forEach(site => {
+                site.classList.remove('selected');
+            });
+            selectedInjectionSite = null;
         }
         
         function deleteEntry(id) {
@@ -559,7 +718,7 @@
             div.className = 'entry-item';
             div.innerHTML = `
                 <div class="entry-header">
-                    <div class="entry-time">${time}</div>
+                    <div class="entry-time">${time}${entry.injectionSite ? ` • Site: ${entry.injectionSite}` : ''}</div>
                     <button class="entry-delete" onclick="deleteEntry(${entry.id})">Delete</button>
                 </div>
                 <div class="entry-values">
