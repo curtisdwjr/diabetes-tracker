@@ -14,7 +14,7 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 50%, #e0e0e0 100%);
+            background: #6b6b6b;
             min-height: 100vh;
             padding: 20px;
             display: flex;
@@ -93,7 +93,7 @@
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .form-group:last-child {
@@ -103,8 +103,8 @@
         /* Horizontal input row */
         .input-row {
             display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 15px;
         }
         
         .input-row .form-group {
@@ -135,7 +135,7 @@
             margin: 0 auto;
             border: 3px solid #d0d0d0;
             border-radius: 50%;
-            background: white;
+            background: #f5f0e8;
         }
         
         /* Navel button in center */
@@ -167,8 +167,8 @@
         
         .injection-site {
             position: absolute;
-            width: 40px;
-            height: 40px;
+            width: 25px;
+            height: 25px;
             border-radius: 50%;
             background: #e0e0e0;
             border: 3px solid #999;
@@ -176,21 +176,17 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            color: #666;
-            font-size: 0.9rem;
             transition: all 0.3s ease;
         }
         
         .injection-site:hover {
             background: #d0d0d0;
-            transform: scale(1.1);
+            transform: scale(1.2);
         }
         
         .injection-site.selected {
             background: #666;
             border-color: #444;
-            color: white;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
         
@@ -239,10 +235,10 @@
         
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             color: #444;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
         }
         
         input[type="number"],
@@ -250,10 +246,10 @@
         input[type="time"],
         textarea {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border: 2px solid #d0d0d0;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-family: inherit;
             transition: border-color 0.3s ease;
         }
@@ -510,8 +506,20 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="insulinInput">Insulin</label>
-                        <input type="number" id="insulinInput" placeholder="units" min="0" max="100" step="0.5">
+                        <label for="insulinQuickInput">Fast Acting Insulin</label>
+                        <input type="number" id="insulinQuickInput" placeholder="units" min="0" max="100" step="0.5">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="glucose2Input">Glucose</label>
+                        <input type="number" id="glucose2Input" placeholder="mg/dL" min="0" max="600">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="insulinSlowInput">Slow Acting Insulin</label>
+                        <input type="number" id="insulinSlowInput" placeholder="units" min="0" max="100" step="0.5">
                     </div>
                 </div>
                 
@@ -520,12 +528,12 @@
                     <h4>Injection Site (around navel)</h4>
                     <div class="injection-circle">
                         <div class="navel-center"></div>
-                        <div class="injection-site site-1" data-position="1" onclick="selectInjectionSite('1')">1</div>
-                        <div class="injection-site site-3" data-position="3" onclick="selectInjectionSite('3')">3</div>
-                        <div class="injection-site site-5" data-position="5" onclick="selectInjectionSite('5')">5</div>
-                        <div class="injection-site site-7" data-position="7" onclick="selectInjectionSite('7')">7</div>
-                        <div class="injection-site site-9" data-position="9" onclick="selectInjectionSite('9')">9</div>
-                        <div class="injection-site site-11" data-position="11" onclick="selectInjectionSite('11')">11</div>
+                        <div class="injection-site site-1" data-position="1" onclick="selectInjectionSite('1')"></div>
+                        <div class="injection-site site-3" data-position="3" onclick="selectInjectionSite('3')"></div>
+                        <div class="injection-site site-5" data-position="5" onclick="selectInjectionSite('5')"></div>
+                        <div class="injection-site site-7" data-position="7" onclick="selectInjectionSite('7')"></div>
+                        <div class="injection-site site-9" data-position="9" onclick="selectInjectionSite('9')"></div>
+                        <div class="injection-site site-11" data-position="11" onclick="selectInjectionSite('11')"></div>
                     </div>
                     <div class="injection-hint">Click the position where you injected</div>
                 </div>
@@ -618,12 +626,19 @@
         
         function addEntry() {
             const glucose = parseFloat(document.getElementById('glucoseInput').value);
-            const insulin = parseFloat(document.getElementById('insulinInput').value);
+            const glucose2 = parseFloat(document.getElementById('glucose2Input').value);
+            const insulinQuick = parseFloat(document.getElementById('insulinQuickInput').value);
+            const insulinSlow = parseFloat(document.getElementById('insulinSlowInput').value);
             const notes = document.getElementById('notesInput').value.trim();
             const customTime = document.getElementById('timeInput').value;
             
-            if (!glucose || !insulin) {
-                alert('Please enter both glucose level and insulin units');
+            if (!glucose && !glucose2) {
+                alert('Please enter at least one glucose level');
+                return;
+            }
+            
+            if (!insulinQuick && !insulinSlow) {
+                alert('Please enter at least one insulin amount');
                 return;
             }
             
@@ -641,8 +656,10 @@
             const entry = {
                 id: Date.now(),
                 timestamp: timestamp,
-                glucose: glucose,
-                insulin: insulin,
+                glucose: glucose || null,
+                glucose2: glucose2 || null,
+                insulinQuick: insulinQuick || null,
+                insulinSlow: insulinSlow || null,
                 injectionSite: selectedInjectionSite,
                 notes: notes
             };
@@ -656,14 +673,12 @@
         function clearForm() {
             document.getElementById('timeInput').value = '';
             document.getElementById('glucoseInput').value = '';
-            document.getElementById('insulinInput').value = '';
+            document.getElementById('glucose2Input').value = '';
+            document.getElementById('insulinQuickInput').value = '';
+            document.getElementById('insulinSlowInput').value = '';
             document.getElementById('notesInput').value = '';
             
-            // Clear injection site selection
-            document.querySelectorAll('.injection-site').forEach(site => {
-                site.classList.remove('selected');
-            });
-            selectedInjectionSite = null;
+            // Don't clear injection site - keep it selected for next time
         }
         
         function deleteEntry(id) {
@@ -683,10 +698,20 @@
             
             // Update stats
             if (todayEntries.length > 0) {
-                const avgGlucose = todayEntries.reduce((sum, e) => sum + e.glucose, 0) / todayEntries.length;
-                document.getElementById('avgGlucose').textContent = Math.round(avgGlucose);
+                // Calculate average glucose from all glucose readings
+                let glucoseSum = 0;
+                let glucoseCount = 0;
+                todayEntries.forEach(e => {
+                    if (e.glucose) { glucoseSum += e.glucose; glucoseCount++; }
+                    if (e.glucose2) { glucoseSum += e.glucose2; glucoseCount++; }
+                });
+                const avgGlucose = glucoseCount > 0 ? glucoseSum / glucoseCount : 0;
+                document.getElementById('avgGlucose').textContent = avgGlucose > 0 ? Math.round(avgGlucose) : '--';
                 
-                const totalInsulin = todayEntries.reduce((sum, e) => sum + e.insulin, 0);
+                // Calculate total insulin from all types
+                const totalInsulin = todayEntries.reduce((sum, e) => {
+                    return sum + (e.insulinQuick || 0) + (e.insulinSlow || 0) + (e.insulin || 0);
+                }, 0);
                 document.getElementById('totalInsulin').textContent = totalInsulin.toFixed(1);
             } else {
                 document.getElementById('avgGlucose').textContent = '--';
@@ -722,20 +747,51 @@
                     <button class="entry-delete" onclick="deleteEntry(${entry.id})">Delete</button>
                 </div>
                 <div class="entry-values">
-                    <div class="entry-value">
-                        <div class="entry-value-label">Glucose</div>
-                        <div>
-                            <span class="entry-value-number">${entry.glucose}</span>
-                            <span class="entry-value-unit">mg/dL</span>
+                    ${entry.glucose ? `
+                        <div class="entry-value">
+                            <div class="entry-value-label">Glucose</div>
+                            <div>
+                                <span class="entry-value-number">${entry.glucose}</span>
+                                <span class="entry-value-unit">mg/dL</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="entry-value">
-                        <div class="entry-value-label">Insulin</div>
-                        <div>
-                            <span class="entry-value-number">${entry.insulin}</span>
-                            <span class="entry-value-unit">units</span>
+                    ` : ''}
+                    ${entry.insulinQuick ? `
+                        <div class="entry-value">
+                            <div class="entry-value-label">Fast Acting</div>
+                            <div>
+                                <span class="entry-value-number">${entry.insulinQuick}</span>
+                                <span class="entry-value-unit">units</span>
+                            </div>
                         </div>
-                    </div>
+                    ` : ''}
+                    ${entry.glucose2 ? `
+                        <div class="entry-value">
+                            <div class="entry-value-label">Glucose</div>
+                            <div>
+                                <span class="entry-value-number">${entry.glucose2}</span>
+                                <span class="entry-value-unit">mg/dL</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${entry.insulinSlow ? `
+                        <div class="entry-value">
+                            <div class="entry-value-label">Slow Acting</div>
+                            <div>
+                                <span class="entry-value-number">${entry.insulinSlow}</span>
+                                <span class="entry-value-unit">units</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${entry.insulin ? `
+                        <div class="entry-value">
+                            <div class="entry-value-label">Insulin</div>
+                            <div>
+                                <span class="entry-value-number">${entry.insulin}</span>
+                                <span class="entry-value-unit">units</span>
+                            </div>
+                        </div>
+                    ` : ''}
                 </div>
                 ${entry.notes ? `
                     <div class="entry-notes">
